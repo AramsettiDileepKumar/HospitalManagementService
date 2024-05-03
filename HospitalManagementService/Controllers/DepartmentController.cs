@@ -38,7 +38,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while adding the Department: {ex.Message}");
+                return Ok($"An error occurred while adding the Department: {ex.Message}");
             }
 
         }
@@ -64,7 +64,7 @@ namespace HospitalManagementService.Controllers
             }
             catch(Exception ex) 
             {
-                return StatusCode(500, ex.Message);
+                return Ok(ex.Message);
             }
         }
         [Authorize(Roles = "Admin")]
@@ -89,7 +89,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return Ok( ex.Message);
             }
         }
         [Authorize(Roles = "Admin")]
@@ -113,7 +113,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred : {ex.Message}");
+                return Ok( $"An error occurred : {ex.Message}");
             }
 
         }
@@ -139,7 +139,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred : {ex.Message}");
+                return Ok( $"An error occurred : {ex.Message}");
             }
         }
 
