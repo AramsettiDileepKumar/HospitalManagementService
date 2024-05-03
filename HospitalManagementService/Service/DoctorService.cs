@@ -4,24 +4,27 @@ using HospitalManagementService.DTO;
 using HospitalManagementService.Entity;
 using HospitalManagementService.Interface;
 using System.Data;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace HospitalManagementService.Service
 {
     public class DoctorService :IDoctor
     {
         private readonly DapperContext context;
-        public DoctorService( DapperContext context)
+        private readonly IHttpClientFactory httpClientFactory;
+        public DoctorService(IHttpClientFactory httpClientFactory, DapperContext context)
         {
             this.context = context;
+            this.httpClientFactory = httpClientFactory;
           
         }
-            public async Task<bool> CreateDoctor(DoctorRequest request)
+            public async Task<bool> CreateDoctor(DoctorRequest request, int doctorId    )
             {
             try
             {
                 var query = "INSERT INTO Doctor (DoctorId, DeptId, DoctorName, DoctorAge, DoctorAvailable, Specialization, Qualifications) VALUES (@DoctorId, @DeptId, @DoctorName, @DoctorAge, @DoctorAvailable, @Specialization, @Qualifications);";
-                DoctorEntity e = MapToEntity(request);
-                //getUserById(request.DoctorId));
+                DoctorEntity e = MapToEntity(request, getUserById(doctorId));
                 var parameters = new DynamicParameters();
                 parameters.Add("@DoctorId", e.DoctorId);
                 parameters.Add("@DeptId", e.DeptId);
@@ -41,18 +44,34 @@ namespace HospitalManagementService.Service
                 throw new Exception(ex.Message);
             }
             }
-            private DoctorEntity MapToEntity(DoctorRequest request)
+            private DoctorEntity MapToEntity(DoctorRequest request,User user)
             {
                 return new DoctorEntity
                 {
-                    DoctorId = request.DoctorId,
+                    DoctorId = user.UserID,
                     DeptId = request.DeptId,
-                    DoctorName = request.DoctorName,
+                    DoctorName = user.FirstName,
                     DoctorAge = request.DoctorAge,
                     DoctorAvailable = request.DoctorAvailable,
                     Specialization = request.Specialization,
                     Qualifications = request.Qualifications
                 };
+            }
+            public User getUserById(int doctorId)
+            {
+                try
+                {
+                    var httpclient = httpClientFactory.CreateClient("userById");
+                    var response = httpclient.GetAsync($"GetUserById{doctorId}").Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = response.Content.ReadFromJsonAsync<User>().Result;
+                    return result;
+                } 
+                throw new Exception("UserNotFound Create User FIRST OE TRY DIFFERENT EMAIL ID");
+                }
+                catch(Exception ex)
+                { throw new Exception(ex.Message); }
             }
             public async Task<DoctorEntity?> GetDoctorById(int doctorId)
             {
@@ -97,11 +116,11 @@ namespace HospitalManagementService.Service
                         existingDoctor.Qualifications = request.Qualifications;
                         existingDoctor.DoctorAge = request.DoctorAge;
                         existingDoctor.DoctorAvailable = request.DoctorAvailable;
-                        string query = "update Doctor set Specialization=@Specialization,Qualifications=@Qualifications,DoctorName=@Doctorname,DoctorAge=@doctorAge where DoctorId=@DoctorId and DeptId=@DeptId";
+                        string query = "update Doctor set Specialization=@Specialization,Qualifications=@Qualifications,DoctorAge=@doctorAge where DoctorId=@DoctorId and DeptId=@DeptId";
                         var parameters = new DynamicParameters();
                         parameters.Add("@DoctorId", doctorId);
                         parameters.Add("@DeptId", request.DeptId);
-                        parameters.Add("@Doctorname", request.DoctorName);
+                       // parameters.Add("@Doctorname", request.DoctorName);
                         parameters.Add("@doctorAge", request.DoctorAge);
                         parameters.Add("@Specialization", request.Specialization);
                         parameters.Add("@Qualifications", request.Qualifications);

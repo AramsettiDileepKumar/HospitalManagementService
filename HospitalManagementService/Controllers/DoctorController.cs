@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using System.Xml.Linq;
 
 namespace HospitalManagementService.Controllers
@@ -20,13 +21,14 @@ namespace HospitalManagementService.Controllers
         {
            this.service = _service;
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Doctor")]
         [HttpPost]
         public async Task<IActionResult> CreateDoctor(DoctorRequest request)
         {
             try
             {
-                var result = await service.CreateDoctor(request);
+                var doctorId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var result = await service.CreateDoctor(request,doctorId);
                 if (result)
                 {
                     var response = new ResponseModel<bool>
@@ -41,10 +43,10 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
+                return Ok($"An error occurred: {ex.Message}");
             }
         }
-        [Authorize(Roles = "Admin")]
+       // [Authorize(Roles = "Admin")]
         [HttpGet("GetDoctorById")]
         public async Task<IActionResult> GetDoctorById(int doctorId)
         {
@@ -53,19 +55,13 @@ namespace HospitalManagementService.Controllers
                 var result = await service.GetDoctorById(doctorId);
                 if (result!=null)
                 {
-                    var response = new ResponseModel<DoctorEntity>
-                    {
-                        Success = true,
-                        Message = "Details Fetched Successfully",
-                        Data = result
-                    };
-                    return Ok(response);
+                    return Ok(result);
                 }
                 return BadRequest("invalid input");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while adding the user: {ex.Message}");
+                return Ok($"An error occurred : {ex.Message}");
             }
         }
         [Authorize(Roles = "Admin")]
@@ -89,7 +85,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred : {ex.Message}");
+                return Ok($"An error occurred : {ex.Message}");
             }
         }
         [Authorize(Roles = "Admin")]
@@ -113,7 +109,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred : {ex.Message}");
+                return Ok($"An error occurred : {ex.Message}");
             }
         }
         [Authorize(Roles = "Admin")]
@@ -137,7 +133,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred : {ex.Message}");
+                return Ok($"An error occurred : {ex.Message}");
             }
         }
         [Authorize(Roles = "Admin")]
@@ -161,7 +157,7 @@ namespace HospitalManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred : {ex.Message}");
+                return Ok($"An error occurred : {ex.Message}");
             }
         }
 
